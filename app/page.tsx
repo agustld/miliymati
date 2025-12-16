@@ -10,7 +10,7 @@ export default function Home() {
     minutes: 0,
     seconds: 0
   })
-  const [isPlaying, setIsPlaying] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(true)
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
   const [showBankDetails, setShowBankDetails] = useState(false)
   const [showUsefulInfo, setShowUsefulInfo] = useState(false)
@@ -41,16 +41,70 @@ export default function Home() {
   }, [weddingDate])
 
   useEffect(() => {
-    const audioElement = new Audio('/audio/welcome.mp3')
+    const audioElement = new Audio('/assets/teddy.mp3')
+    audioElement.loop = true
+    audioElement.volume = 0.5
+    audioElement.preload = 'auto'
     audioElement.addEventListener('ended', () => setIsPlaying(false))
     audioElement.addEventListener('error', () => {
       setIsPlaying(false)
     })
+    
+    // Función para intentar reproducir
+    const tryPlay = async () => {
+      if (audioElement.paused) {
+        try {
+          await audioElement.play()
+          setIsPlaying(true)
+        } catch (error) {
+          setIsPlaying(false)
+        }
+      }
+    }
+    
+    // Intentar reproducir en múltiples eventos
+    audioElement.addEventListener('loadeddata', tryPlay)
+    audioElement.addEventListener('canplay', tryPlay)
+    audioElement.addEventListener('canplaythrough', tryPlay)
+    
+    // Cargar el audio primero
+    audioElement.load()
+    
+    // Intentar reproducir inmediatamente después de un pequeño delay
+    setTimeout(() => {
+      tryPlay()
+    }, 100)
+    
+    // Intentar reproducir cuando la página esté completamente cargada
+    if (document.readyState === 'complete') {
+      tryPlay()
+    } else {
+      window.addEventListener('load', tryPlay, { once: true })
+    }
+    
+    // Listener para iniciar reproducción en la primera interacción del usuario
+    const startOnInteraction = () => {
+      tryPlay()
+    }
+    
+    document.addEventListener('click', startOnInteraction, { once: true })
+    document.addEventListener('touchstart', startOnInteraction, { once: true })
+    document.addEventListener('keydown', startOnInteraction, { once: true })
+    document.addEventListener('mousemove', startOnInteraction, { once: true })
+    
     setAudio(audioElement)
 
     return () => {
       audioElement.pause()
       audioElement.removeEventListener('ended', () => setIsPlaying(false))
+      audioElement.removeEventListener('loadeddata', tryPlay)
+      audioElement.removeEventListener('canplay', tryPlay)
+      audioElement.removeEventListener('canplaythrough', tryPlay)
+      window.removeEventListener('load', tryPlay)
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('touchstart', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+      document.removeEventListener('mousemove', startOnInteraction)
     }
   }, [])
 
@@ -97,6 +151,23 @@ export default function Home() {
 
   return (
     <main className="min-h-screen watercolor-bg text-gray-800">
+      {/* Music Player Button */}
+      <button
+        onClick={toggleAudio}
+        className="fixed top-4 right-4 z-50 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 flex items-center justify-center"
+        aria-label={isPlaying ? 'Pausar música' : 'Reproducir música'}
+      >
+        {isPlaying ? (
+          <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+          </svg>
+        ) : (
+          <svg className="w-6 h-6 text-gray-800" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M8 5v14l11-7z"/>
+          </svg>
+        )}
+      </button>
+
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col items-center justify-center px-4">
         {/* Background Image */}
@@ -121,9 +192,9 @@ export default function Home() {
               <Image
                 src="/assets/MiliMati.png"
                 alt="Mili & Mati"
-                width={800}
-                height={400}
-                className="w-full h-auto"
+                width={340}
+                height={450}
+                className="w-[340px] h-[450px] object-contain mx-auto"
                 priority
               />
             </div>
@@ -243,6 +314,7 @@ export default function Home() {
                   alt={`Foto ${num}`}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-300"
+                  style={{ filter: 'grayscale(100%)' }}
                 />
               </div>
             ))}
@@ -287,7 +359,7 @@ export default function Home() {
                         alt={`Foto ${num}`}
                         fill
                         className="object-cover"
-                        style={{ filter: 'sepia(40%) grayscale(20%)' }}
+                        style={{ filter: 'grayscale(100%)' }}
                       />
                     </div>
                   );
@@ -302,6 +374,7 @@ export default function Home() {
                     alt="Imagen ampliada"
                     fill
                     className="object-contain rounded-lg shadow-2xl"
+                    style={{ filter: 'grayscale(100%)' }}
                   />
                 </div>
               </div>
@@ -529,28 +602,6 @@ export default function Home() {
               </div>
             )}
           </div>
-        </div>
-      </section>
-
-      {/* Song Suggestions */}
-      <section id="canciones" className="py-12 px-4">
-        <div className="container mx-auto max-w-4xl text-center">
-          <div className="flex justify-center mb-6">
-            <Image src="/assets/icono-canciones.svg" alt="Canciones" width={150} height={150} />
-          </div>
-          <h2 className="font-montserrat text-3xl md:text-4xl font-light mb-4 text-gray-800" style={{ letterSpacing: '3px' }}>¿QUÉ CANCIONES NO PUEDEN FALTAR?</h2>
-          <p className="font-montserrat text-base md:text-lg mb-8 text-gray-700" style={{ fontWeight: 300 }}>
-            ¡Ayudanos sugiriendo las canciones que pensás que no pueden faltar en la fiesta!
-          </p>
-          <a
-            href="https://docs.google.com/forms/d/e/1FAIpQLSfEO7d5UgNe-R7fSTuQCsy5uL9dhBFFPX2ukD6lThrYW6yyTg/viewform?usp=header"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="btn inline-block"
-            style={{ borderRadius: '30px', textDecoration: 'none' }}
-          >
-            SUGERIR CANCIÓN
-          </a>
         </div>
       </section>
 

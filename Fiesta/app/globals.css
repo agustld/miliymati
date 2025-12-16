@@ -1,0 +1,284 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Montserrat font from assets */
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/assets/Montserrat.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+/* Variables CSS */
+:root {
+  --color-primario: #dab485;
+  --color-secundario: #a4bb8f;
+  --font-montserrat: 'Montserrat', sans-serif;
+}
+
+/* Generales */
+body {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 17px;
+  @apply bg-[#faf9f7] text-gray-800;
+  background-image: 
+    radial-gradient(circle at 1px 1px, rgba(0,0,0,0.02) 1px, transparent 0);
+  background-size: 20px 20px;
+}
+
+p {
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 300;
+  font-size: 17px;
+}
+
+h4 {
+  font-family: 'Montserrat', sans-serif;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  font-size: 25px;
+  font-weight: 400;
+}
+
+/* Botones */
+.btn {
+  font-family: 'Montserrat', sans-serif;
+  color: white;
+  background-color: var(--color-primario);
+  border-radius: 30px;
+  padding: 10px 40px;
+  border: 1px solid var(--color-primario);
+  text-transform: uppercase;
+}
+
+.btn:hover {
+  color: var(--color-primario);
+  background-color: white;
+}
+
+.btn-alt {
+  font-family: 'Montserrat', sans-serif;
+  color: var(--color-primario);
+  background-color: white;
+}
+
+.btn-alt:hover {
+  color: white;
+  background-color: var(--color-primario);
+  border: 1px solid white;
+}
+
+.btn:focus {
+  box-shadow: none;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+a:hover {
+  text-decoration: none;
+}
+
+/* Animación fade in */
+.fade-in {
+  animation: fadeIn ease 4s;
+  -webkit-animation: fadeIn ease 4s;
+  -moz-animation: fadeIn ease 4s;
+  -o-animation: fadeIn ease 4s;
+  -ms-animation: fadeIn ease 4s;
+}
+
+.fade-in-portada {
+  animation: fadeIn ease 8s;
+  -webkit-animation: fadeIn ease 8s;
+  -moz-animation: fadeIn ease 8s;
+  -o-animation: fadeIn ease 8s;
+  -ms-animation: fadeIn ease 8s;
+}
+
+@keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-moz-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-webkit-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-o-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@-ms-keyframes fadeIn {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Animación fade in up */
+.fadeInUp {
+  animation-name: fadeInUp;
+  -webkit-animation-name: fadeInUp;
+}
+
+.animated {
+  animation-duration: 1.5s;
+  animation-fill-mode: both;
+  -webkit-animation-duration: 1.5s;
+  -webkit-animation-fill-mode: both;
+}
+
+@keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@-moz-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@-webkit-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@-o-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+@-ms-keyframes fadeInUp {
+  0% {
+    opacity: 0;
+    transform: translateY(120px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0px);
+  }
+}
+
+/* Watercolor background */
+.watercolor-bg {
+  background: 
+    radial-gradient(circle at 20% 10%, rgba(150, 178, 150, 0.08) 0%, transparent 40%),
+    radial-gradient(circle at 80% 90%, rgba(212, 184, 150, 0.08) 0%, transparent 40%),
+    #faf9f7;
+}
+
+/* Elegant names separator */
+.names-separator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+}
+
+.names-separator::before,
+.names-separator::after {
+  content: '';
+  width: 60px;
+  height: 1px;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.names-separator .ampersand {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 4rem;
+  font-weight: 300;
+  color: var(--color-primario);
+  line-height: 1;
+}
+
+@media (min-width: 768px) {
+  .names-separator .ampersand {
+    font-size: 5rem;
+  }
+  .names-separator::before,
+  .names-separator::after {
+    width: 80px;
+  }
+}
+
+/* Floral decorative elements */
+.floral-top {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: 
+    radial-gradient(ellipse 200px 100px at 20% 0%, rgba(150, 178, 150, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 200px 100px at 80% 0%, rgba(212, 184, 150, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.floral-bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 150px;
+  background: 
+    radial-gradient(ellipse 200px 100px at 20% 100%, rgba(150, 178, 150, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse 200px 100px at 80% 100%, rgba(212, 184, 150, 0.15) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 1;
+}

@@ -11,7 +11,7 @@ export default function Home() {
     seconds: 0
   })
   const [isPlaying, setIsPlaying] = useState(true)
-  const [audio, setAudio] = useState<HTMLAudioElement | null>(null)
+  const audioRef = useRef<HTMLAudioElement>(null)
   const [showBankDetails, setShowBankDetails] = useState(false)
   const [showUsefulInfo, setShowUsefulInfo] = useState(false)
   const [showCalendarDropdown, setShowCalendarDropdown] = useState(false)
@@ -40,85 +40,101 @@ export default function Home() {
     return () => clearInterval(timer)
   }, [weddingDate])
 
+  // Initialize audio and load user preference from localStorage
   useEffect(() => {
-    const audioElement = new Audio('/assets/teddy.mp3')
-    audioElement.loop = true
+    const audioElement = audioRef.current
+    if (!audioElement) return
+
+    // Configure audio
     audioElement.volume = 0.5
-    audioElement.preload = 'auto'
-    audioElement.addEventListener('ended', () => setIsPlaying(false))
-    audioElement.addEventListener('error', () => {
+    audioElement.loop = true
+
+    // Event listeners for state management
+    const handlePlay = () => setIsPlaying(true)
+    const handlePause = () => setIsPlaying(false)
+    const handleEnded = () => setIsPlaying(false)
+    const handleError = (e: Event) => {
+      console.error('Audio error:', e)
       setIsPlaying(false)
-    })
-    
-    // Función para intentar reproducir
-    const tryPlay = async () => {
-      if (audioElement.paused) {
-        try {
-          await audioElement.play()
-          setIsPlaying(true)
-        } catch (error) {
-          setIsPlaying(false)
+    }
+
+    audioElement.addEventListener('play', handlePlay)
+    audioElement.addEventListener('pause', handlePause)
+    audioElement.addEventListener('ended', handleEnded)
+    audioElement.addEventListener('error', handleError)
+
+    // Try to autoplay when audio is ready
+    const tryAutoplay = async () => {
+      try {
+        await audioElement.play()
+        setIsPlaying(true)
+        localStorage.setItem('musicPreference', 'playing')
+      } catch (error) {
+        // If autoplay fails (browser restriction), try on first user interaction
+        setIsPlaying(false)
+        const startOnInteraction = async () => {
+          try {
+            await audioElement.play()
+            setIsPlaying(true)
+            localStorage.setItem('musicPreference', 'playing')
+          } catch (err) {
+            console.error('Failed to play audio:', err)
+          }
+          // Remove listeners after first interaction
+          document.removeEventListener('click', startOnInteraction)
+          document.removeEventListener('touchstart', startOnInteraction)
+          document.removeEventListener('keydown', startOnInteraction)
+          window.removeEventListener('scroll', startOnInteraction)
         }
+        
+        document.addEventListener('click', startOnInteraction, { once: true })
+        document.addEventListener('touchstart', startOnInteraction, { once: true })
+        document.addEventListener('keydown', startOnInteraction, { once: true })
+        window.addEventListener('scroll', startOnInteraction, { once: true, passive: true })
       }
     }
-    
-    // Intentar reproducir en múltiples eventos
-    audioElement.addEventListener('loadeddata', tryPlay)
-    audioElement.addEventListener('canplay', tryPlay)
-    audioElement.addEventListener('canplaythrough', tryPlay)
-    
-    // Cargar el audio primero
-    audioElement.load()
-    
-    // Intentar reproducir inmediatamente después de un pequeño delay
-    setTimeout(() => {
-      tryPlay()
-    }, 100)
-    
-    // Intentar reproducir cuando la página esté completamente cargada
-    if (document.readyState === 'complete') {
-      tryPlay()
+
+    // Try autoplay when audio can play
+    const handleCanPlay = () => {
+      if (audioElement.paused) {
+        tryAutoplay()
+      }
+    }
+
+    audioElement.addEventListener('canplay', handleCanPlay, { once: true })
+    audioElement.addEventListener('canplaythrough', handleCanPlay, { once: true })
+
+    // Try immediately if already loaded
+    if (audioElement.readyState >= 2) {
+      tryAutoplay()
     } else {
-      window.addEventListener('load', tryPlay, { once: true })
+      audioElement.load()
     }
-    
-    // Listener para iniciar reproducción en la primera interacción del usuario
-    const startOnInteraction = () => {
-      tryPlay()
-    }
-    
-    document.addEventListener('click', startOnInteraction, { once: true })
-    document.addEventListener('touchstart', startOnInteraction, { once: true })
-    document.addEventListener('keydown', startOnInteraction, { once: true })
-    document.addEventListener('mousemove', startOnInteraction, { once: true })
-    
-    setAudio(audioElement)
 
     return () => {
-      audioElement.pause()
-      audioElement.removeEventListener('ended', () => setIsPlaying(false))
-      audioElement.removeEventListener('loadeddata', tryPlay)
-      audioElement.removeEventListener('canplay', tryPlay)
-      audioElement.removeEventListener('canplaythrough', tryPlay)
-      window.removeEventListener('load', tryPlay)
-      document.removeEventListener('click', startOnInteraction)
-      document.removeEventListener('touchstart', startOnInteraction)
-      document.removeEventListener('keydown', startOnInteraction)
-      document.removeEventListener('mousemove', startOnInteraction)
+      audioElement.removeEventListener('play', handlePlay)
+      audioElement.removeEventListener('pause', handlePause)
+      audioElement.removeEventListener('ended', handleEnded)
+      audioElement.removeEventListener('error', handleError)
     }
   }, [])
 
-  const toggleAudio = () => {
-    if (audio) {
+  const toggleAudio = async () => {
+    const audioElement = audioRef.current
+    if (!audioElement) return
+
+    try {
       if (isPlaying) {
-        audio.pause()
-        setIsPlaying(false)
+        audioElement.pause()
+        localStorage.setItem('musicPreference', 'paused')
       } else {
-        audio.play().catch(() => {
-          setIsPlaying(false)
-        })
-        setIsPlaying(true)
+        await audioElement.play()
+        localStorage.setItem('musicPreference', 'playing')
       }
+    } catch (error) {
+      console.error('Failed to toggle audio:', error)
+      setIsPlaying(false)
+      localStorage.setItem('musicPreference', 'paused')
     }
   }
 
@@ -151,10 +167,18 @@ export default function Home() {
 
   return (
     <main className="min-h-screen watercolor-bg text-gray-800">
-      {/* Music Player Button */}
+      {/* Audio Element */}
+      <audio
+        ref={audioRef}
+        src="/assets/teddy.mp3"
+        preload="auto"
+        style={{ display: 'none' }}
+      />
+
+      {/* Floating Play Music Button */}
       <button
         onClick={toggleAudio}
-        className="fixed top-4 right-4 z-50 bg-white/80 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 flex items-center justify-center"
+        className="fixed top-4 right-4 z-50 bg-white/90 hover:bg-white rounded-full p-3 shadow-lg transition-all duration-300 flex items-center justify-center hover:shadow-xl"
         aria-label={isPlaying ? 'Pausar música' : 'Reproducir música'}
       >
         {isPlaying ? (

@@ -143,7 +143,7 @@ export default function Home() {
       title: 'Nuestra Boda - Mili & Mati',
       description: 'Te esperamos para celebrar nuestro día especial\n\nUbicación: Hotel la secundina, Cerrillos, Salta\n\nCómo llegar: https://maps.app.goo.gl/GEyFo9Pbt83HELsc9',
       location: 'Hotel la secundina, Cerrillos, Salta',
-      startDate: '20260307T190000',
+      startDate: '20260307T180000',
       endDate: '20260307T230000'
     }
 
@@ -272,7 +272,7 @@ export default function Home() {
               </h2>
               <div className="space-y-3 mb-8 flex-grow">
                 <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>7 de Marzo</p>
-                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>19:00 hs</p>
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>18:00 hs</p>
                 <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Hotel la secundina</p>
                 <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Cerrillos, Salta</p>
               </div>

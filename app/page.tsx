@@ -278,11 +278,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Party Section */}
+      {/* Ceremonia y Fiesta Section - dos columnas */}
       <section id="ceremonia-fiesta" className="min-h-screen flex items-center py-8 md:py-12 px-4" style={{ backgroundColor: '#fff' }}>
         <div className="container mx-auto max-w-6xl">
-          <div className="flex justify-center">
-            {/* Party Column */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 items-start justify-items-center">
+            {/* Columna Ceremonia */}
+            <div id="ceremonia" className="flex flex-col items-center text-center">
+              <div className="mb-6">
+                <Image src="/assets/icono-ceremonia.svg" alt="Ceremonia" width={150} height={150} />
+              </div>
+              <h2 className="font-montserrat text-3xl md:text-4xl font-light text-gray-800 mb-8 uppercase tracking-wider" style={{ letterSpacing: '3px' }}>
+                Ceremonia
+              </h2>
+              <div className="space-y-3 mb-8">
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>7 de Marzo</p>
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>18:00 hs</p>
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Hotel la secundina</p>
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Cerrillos, Salta</p>
+              </div>
+              <a
+                href="https://www.google.com/maps/place/La+Secundina+-+hotel+de+campo/@-24.9169785,-65.4893283,17z/data=!4m9!3m8!1s0x941be7659dac82fb:0xe8b6337904d417eb!5m2!4m1!1i2!8m2!3d-24.9169785!4d-65.4867534!16s%2Fg%2F11h_5nhqt8?entry=ttu"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn mt-auto inline-block"
+                style={{ borderRadius: '30px', textDecoration: 'none' }}
+              >
+                LLEGAR A LA CEREMONIA
+              </a>
+            </div>
+
+            {/* Columna Fiesta */}
             <div id="fiesta" className="flex flex-col items-center text-center">
               <div className="mb-6">
                 <Image src="/assets/icono-fiesta.svg" alt="Fiesta" width={150} height={150} />
@@ -291,7 +316,7 @@ export default function Home() {
                 Fiesta
               </h2>
               <div className="space-y-3 mb-8">
-                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>7 de Marzo 22:00 hs</p>
+                <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Después de la ceremonia</p>
                 <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Hotel la secundina</p>
                 <p className="font-montserrat text-lg md:text-xl text-gray-800" style={{ fontWeight: 300 }}>Cerrillos, Salta</p>
                 <p className="font-montserrat text-base md:text-lg text-gray-600 mt-4" style={{ fontWeight: 300 }}>

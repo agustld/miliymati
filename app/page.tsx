@@ -63,38 +63,54 @@ export default function Home() {
     audioElement.addEventListener('ended', handleEnded)
     audioElement.addEventListener('error', handleError)
 
-    // Try to autoplay when audio is ready
+    let unlockListenersRemoved = false
+    const removeUnlockListeners = () => {
+      if (unlockListenersRemoved) return
+      unlockListenersRemoved = true
+      document.removeEventListener('click', startOnInteraction)
+      document.removeEventListener('touchstart', startOnInteraction)
+      document.removeEventListener('touchend', startOnInteraction)
+      document.removeEventListener('keydown', startOnInteraction)
+      window.removeEventListener('scroll', startOnInteraction)
+    }
+
+    // IMPORTANTE: play() debe llamarse de forma síncrona dentro del gesto del usuario
+    // (touch/click). En móviles el navegador bloquea si se usa async/await.
+    const startOnInteraction = () => {
+      if (!audioElement.paused) {
+        removeUnlockListeners()
+        return
+      }
+      const promise = audioElement.play()
+      if (promise && typeof promise.then === 'function') {
+        promise.then(() => {
+          setIsPlaying(true)
+          localStorage.setItem('musicPreference', 'playing')
+          removeUnlockListeners()
+        }).catch(() => {
+          setIsPlaying(false)
+        })
+      } else {
+        removeUnlockListeners()
+      }
+    }
+
     const tryAutoplay = async () => {
       try {
         await audioElement.play()
         setIsPlaying(true)
         localStorage.setItem('musicPreference', 'playing')
-      } catch (error) {
-        // If autoplay fails (browser restriction), try on first user interaction
+      } catch {
+        // Autoplay bloqueado: esperar primer toque o click
         setIsPlaying(false)
-        const startOnInteraction = async () => {
-          try {
-            await audioElement.play()
-            setIsPlaying(true)
-            localStorage.setItem('musicPreference', 'playing')
-          } catch (err) {
-            console.error('Failed to play audio:', err)
-          }
-          // Remove listeners after first interaction
-          document.removeEventListener('click', startOnInteraction)
-          document.removeEventListener('touchstart', startOnInteraction)
-          document.removeEventListener('keydown', startOnInteraction)
-          window.removeEventListener('scroll', startOnInteraction)
-        }
-        
-        document.addEventListener('click', startOnInteraction, { once: true })
-        document.addEventListener('touchstart', startOnInteraction, { once: true })
-        document.addEventListener('keydown', startOnInteraction, { once: true })
+        document.addEventListener('click', startOnInteraction)
+        document.addEventListener('touchstart', startOnInteraction, { passive: true })
+        document.addEventListener('touchend', startOnInteraction, { passive: true })
+        document.addEventListener('keydown', startOnInteraction)
         window.addEventListener('scroll', startOnInteraction, { once: true, passive: true })
       }
     }
 
-    // Try autoplay when audio can play
     const handleCanPlay = () => {
       if (audioElement.paused) {
         tryAutoplay()
@@ -104,7 +120,6 @@ export default function Home() {
     audioElement.addEventListener('canplay', handleCanPlay, { once: true })
     audioElement.addEventListener('canplaythrough', handleCanPlay, { once: true })
 
-    // Try immediately if already loaded
     if (audioElement.readyState >= 2) {
       tryAutoplay()
     } else {
@@ -112,6 +127,7 @@ export default function Home() {
     }
 
     return () => {
+      removeUnlockListeners()
       audioElement.removeEventListener('play', handlePlay)
       audioElement.removeEventListener('pause', handlePause)
       audioElement.removeEventListener('ended', handleEnded)
@@ -136,6 +152,10 @@ export default function Home() {
       setIsPlaying(false)
       localStorage.setItem('musicPreference', 'paused')
     }
+  }
+
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text).catch(() => {})
   }
 
   const addToCalendar = (type: 'google' | 'outlook' | 'office365' | 'apple' | 'yahoo') => {
@@ -476,28 +496,118 @@ export default function Home() {
           {/* Modal de Datos Bancarios */}
           {showBankDetails && (
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4" onClick={() => setShowBankDetails(false)}>
-              <div className="absolute inset-0 bg-black/50" onClick={(e) => e.stopPropagation()}></div>
-              <div 
-                className="relative bg-[#f5f0e8] rounded-lg p-8 max-w-md w-full shadow-2xl z-10"
+              <div className="absolute inset-0 bg-black/50" onClick={(e) => e.stopPropagation()} />
+              <div
+                className="relative rounded-lg p-8 max-w-md w-full shadow-2xl z-10 font-montserrat"
                 onClick={(e) => e.stopPropagation()}
                 style={{ backgroundColor: '#f5f0e8' }}
               >
                 <button
                   onClick={() => setShowBankDetails(false)}
-                  className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 text-2xl font-light"
-                  style={{ fontSize: '24px', lineHeight: '1' }}
+                  className="absolute top-4 right-4 text-gray-600 hover:text-gray-800 w-8 h-8 flex items-center justify-center"
+                  aria-label="Cerrar"
                 >
-                  ×
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
                 </button>
-                
-                <div className="space-y-8 mt-4">
+
+                <div className="space-y-8 mt-2">
+                  {/* Datos Bancarios */}
                   <div>
-                    <h3 className="font-montserrat text-2xl md:text-3xl font-light mb-4" style={{ letterSpacing: '3px', color: 'var(--color-primario)' }}>Datos Bancarios</h3>
-                    <div className="space-y-3 font-montserrat text-base md:text-lg text-gray-800" style={{ fontWeight: 300 }}>
-                      <p><span className="text-gray-600">* Nombre del Titular:</span> Matias Federico Genovese</p>
-                      <p><span className="text-gray-600">Alias:</span> miliymatiboda.com</p>
-                      <p><span className="text-gray-600">* DNI:</span> 32165089</p>
-                      <p><span className="text-gray-600">* Banco:</span> LEMON</p>
+                    <h3 className="text-xl md:text-2xl font-light italic mb-4" style={{ color: '#a67c52' }}>
+                      Datos Bancarios
+                    </h3>
+                    <div className="space-y-3 text-base text-gray-800">
+                      <p>
+                        <span className="font-normal text-gray-800">Nombre del Titular:</span>{' '}
+                        <span className="italic">Matias Federico Genovese</span>
+                      </p>
+                      <p className="flex items-center gap-2 flex-wrap">
+                        <span className="font-normal text-gray-800">CBU:</span>
+                        <span className="italic">0000168300000012111071</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard('0000168300000012111071'); }}
+                          className="text-gray-600 hover:text-gray-800 p-0.5"
+                          aria-label="Copiar CBU"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </p>
+                      <p className="flex items-center gap-2 flex-wrap">
+                        <span className="font-normal text-gray-800">Alias:</span>
+                        <span className="italic">miliymatiboda.com</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard('miliymatiboda.com'); }}
+                          className="text-gray-600 hover:text-gray-800 p-0.5"
+                          aria-label="Copiar Alias"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">DNI:</span> <span className="italic">32165089</span>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">Banco:</span> <span className="italic">LEMON</span>
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Cuenta en Dólares */}
+                  <div>
+                    <h3 className="text-xl md:text-2xl font-light italic mb-4" style={{ color: '#a67c52' }}>
+                      Cuenta en Dólares
+                    </h3>
+                    <div className="space-y-3 text-base text-gray-800">
+                      <p className="flex items-center gap-2 flex-wrap">
+                        <span className="font-normal text-gray-800">CBU:</span>
+                        <span className="italic">2850114320096020346204</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard('2850114320096020346204'); }}
+                          className="text-gray-600 hover:text-gray-800 p-0.5"
+                          aria-label="Copiar CBU dólares"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </p>
+                      <p className="flex items-center gap-2 flex-wrap">
+                        <span className="font-normal text-gray-800">Alias:</span>
+                        <span className="italic">HONOR.CONFIA.TELA</span>
+                        <button
+                          type="button"
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard('HONOR.CONFIA.TELA'); }}
+                          className="text-gray-600 hover:text-gray-800 p-0.5"
+                          aria-label="Copiar Alias dólares"
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                          </svg>
+                        </button>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">DNI:</span> <span className="italic">30186098</span>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">Banco:</span> <span className="italic">Macro</span>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">Tipo:</span>{' '}
+                        <span className="italic">Caja de Ahorros en U$S</span>
+                      </p>
+                      <p>
+                        <span className="font-normal text-gray-800">N° de Cuenta:</span>{' '}
+                        <span className="italic">211409602034620</span>
+                      </p>
                     </div>
                   </div>
                 </div>

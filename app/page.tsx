@@ -607,10 +607,10 @@ export default function Home() {
                       </p>
                       <p className="flex items-center gap-2 flex-wrap">
                         <span className="font-normal text-gray-800">Alias:</span>
-                        <span className="italic">HONOR.CONFIA.TELA</span>
+                        <span className="italic">HONOR.CONFIA.TELAS</span>
                         <button
                           type="button"
-                          onClick={(e) => { e.stopPropagation(); copyToClipboard('HONOR.CONFIA.TELA'); }}
+                          onClick={(e) => { e.stopPropagation(); copyToClipboard('HONOR.CONFIA.TELAS'); }}
                           className="text-gray-600 hover:text-gray-800 p-0.5"
                           aria-label="Copiar Alias dólares"
                         >
